@@ -24,8 +24,6 @@ services:
 
     volumes:
       - ./services/api-nest:/app
-      - /app/node_modules
-
     depends_on:
       - mongodb
 
