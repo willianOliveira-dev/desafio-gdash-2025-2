@@ -59,5 +59,5 @@ export class CreateUserDto {
     // role
     @IsString({ message: 'O papel do usuário deve ser uma string.' })
     @IsIn(['user', 'admin'], { message: 'O papel deve ser "user" ou "admin".' })
-    role: string;
+    role: string = 'user';
 }

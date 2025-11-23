@@ -7,6 +7,7 @@ import { hash } from 'bcrypt';
 export class User {
     // name
     @Prop({
+        type: String,
         required: true,
         minLength: 2,
         maxLength: 25,
@@ -16,6 +17,7 @@ export class User {
 
     // email
     @Prop({
+        type: String,
         required: true,
         unique: true,
     })
@@ -23,6 +25,7 @@ export class User {
 
     // password
     @Prop({
+        type: String,
         required: true,
         minLength: 8,
         maxLength: 64,
@@ -30,31 +33,37 @@ export class User {
     password: string;
 
     // avatar
-    @Prop()
+    @Prop({ type: String })
     avatar?: string;
 
     //firstName
     @Prop({
+        type: String,
         minLength: 2,
         maxLength: 50,
         default: null,
     })
-    firstName?: string;
+    firstName?: string | null;
 
     //lastname
     @Prop({
+        type: String,
         minLength: 2,
         maxLength: 50,
         default: null,
     })
-    lastname?: string;
+    lastname?: string | null;
 
     // role
     @Prop({
-        default: 'user',
+        type: String,
         enum: ['user', 'admin'],
+        default: 'user',
     })
     role: string;
+
+    @Prop({ type: String, required: false, default: null })
+    currentHashedRefreshToken?: string | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

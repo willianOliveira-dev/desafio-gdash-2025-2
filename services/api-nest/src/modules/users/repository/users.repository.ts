@@ -4,8 +4,11 @@ import { UserDocument } from '../interfaces/users.interface';
 import { User } from '../schemas/user.schema';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
-import type { UserWithoutPassword } from '../interfaces/users.interface';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import type {
+    UserModelWithoutPassword,
+    UserModel,
+} from '../interfaces/users.interface';
 
 @Injectable()
 export class UsersRepository {
@@ -13,40 +16,62 @@ export class UsersRepository {
         @InjectModel(User.name) private readonly userModel: Model<UserDocument>
     ) {}
 
-    async findAll(): Promise<UserWithoutPassword[]> {
+    async findAll(): Promise<UserModelWithoutPassword[]> {
         return this.userModel.find().select('-password -__v').lean().exec();
     }
 
-    async findOne(id: string): Promise<UserWithoutPassword | null> {
-        return this.userModel.findById(id).select('-password -__v').lean().exec();
+    async findOne(id: string): Promise<UserModelWithoutPassword | null> {
+        return this.userModel
+            .findById(id)
+            .select('-password -__v')
+            .lean()
+            .exec();
     }
 
-    async findEmail(email: string): Promise<UserWithoutPassword | null> {
+    async findEmailCount(email: string): Promise<number> {
+        return this.userModel
+            .countDocuments({
+                email,
+            })
+            .exec();
+    }
+
+    async findUsernameCount(username: string): Promise<number> {
+        return this.userModel
+            .countDocuments({
+                username,
+            })
+            .exec();
+    }
+
+    async findByEmailWithPassword(email: string): Promise<UserModel | null> {
         return this.userModel
             .findOne({
                 email,
             })
-            .select('-password -__v')
+            .select('-__v')
             .lean()
             .exec();
     }
 
-    async findUsername(username: string): Promise<UserWithoutPassword | null> {
+    async findByUsernameWithPassword(
+        username: string
+    ): Promise<UserModel | null> {
         return this.userModel
             .findOne({
                 username,
             })
-            .select('-password -__v')
+            .select('-__v')
             .lean()
             .exec();
     }
 
-    async create(dto: CreateUserDto): Promise<UserWithoutPassword> {
-
+    async create(dto: CreateUserDto): Promise<UserModelWithoutPassword> {
         const data: User = {
             ...dto,
-            firstName: dto.firstName ?? undefined,
-            lastname: dto.lastname ?? undefined,
+            firstName: dto.firstName ?? null,
+            lastname: dto.lastname ?? null,
+            currentHashedRefreshToken: null,
         };
 
         const createdUser = new this.userModel(data);
@@ -60,10 +85,33 @@ export class UsersRepository {
         return userWithoutPassword;
     }
 
+    async setCurrentRefreshToken(
+        refreshToken: string,
+        id: string
+    ): Promise<void> {
+        await this.userModel
+            .findByIdAndUpdate(
+                id,
+                { currentHashedRefreshToken: refreshToken },
+                { new: true }
+            )
+            .exec();
+    }
+
+    async removeRefreshToken(id: string): Promise<void> {
+        await this.userModel
+            .findByIdAndUpdate(
+                id,
+                { currentHashedRefreshToken: null },
+                { new: true }
+            )
+            .exec();
+    }
+
     async update(
         dto: UpdateUserDto,
         id: string
-    ): Promise<UserWithoutPassword | null> {
+    ): Promise<UserModelWithoutPassword | null> {
         return this.userModel
             .findByIdAndUpdate(id, dto, { new: true })
             .lean()

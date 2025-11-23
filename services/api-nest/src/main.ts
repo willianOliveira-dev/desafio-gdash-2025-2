@@ -5,13 +5,21 @@ import { Env } from './env.validation';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-execption.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    const BASE_API = 'api/v1/gdash';
+    const BASE_API = 'api/v1';
     const config = app.get(ConfigService<Env>);
 
     app.setGlobalPrefix(BASE_API);
+    
+    app.use(cookieParser.default());
+
+    app.enableCors({
+        origin: config.get('FRONTEND_URL'),
+        credentials: true,
+    });
 
     app.useGlobalFilters(new HttpExceptionFilter());
     app.useGlobalInterceptors(new ResponseInterceptor());
