@@ -1,31 +1,65 @@
 services:
-  mongodb:
-    image: mongo:7
-    container_name: mongodb
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: willianDev
-      MONGO_INITDB_ROOT_PASSWORD: WillianDev2025Secure
+    mongodb:
+        image: mongo:7
+        container_name: mongodb
+        restart: always
+        ports:
+            - '27017:27017'
+        volumes:
+            - mongo_data:/data/db
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
 
-  api-nest:
-    build:
-      context: ./services/api-nest
-      dockerfile: Dockerfile.dev
-    container_name: api-nest
-    restart: always
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./services/api-nest/.env
+    api-nest:
+        build:
+            context: ./services/api-nest
+            dockerfile: Dockerfile
+        container_name: api-nest
+        restart: always
+        ports:
+            - '3000:3000'
+        env_file:
+            - ./services/api-nest/.env
+        volumes:
+            - ./services/api-nest:/app
+        depends_on:
+            - mongodb
+            - rabbitmq
 
-    volumes:
-      - ./services/api-nest:/app
-    depends_on:
-      - mongodb
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: rabbitmq
+        restart: always
+        ports:
+            - '5672:5672' 
+            - '15672:15672' 
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+
+    python-producer:
+        build:
+            context: ./services/python-producer/core-python
+            dockerfile: Dockerfile
+        container_name: python-producer
+        restart: always
+        depends_on:
+            - rabbitmq
+        env_file:
+            - ./services/python-producer/.env
+
+    go-worker:
+        build:
+            context: ./services/go-worker
+            dockerfile: Dockerfile
+        container_name: go-worker
+        restart: always
+        depends_on:
+            - rabbitmq
+            - api-nest
+        env_file:
+            - ./services/go-worker/.env
 
 volumes:
-  mongo_data:
+    mongo_data:
