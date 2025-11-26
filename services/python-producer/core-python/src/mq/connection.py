@@ -10,7 +10,6 @@ class RabbitMQConnection:
         self.queue_name = settings.RABBITMQ_QUEUE
 
     async def connect(self):
-        """Abrir conexão com o RabbitMQ"""
         try:
             self.connection = await connect_robust(self.url)
             self.channel = await self.connection.channel()
@@ -25,7 +24,6 @@ class RabbitMQConnection:
             raise ValueError(f"Houve um erro ao abrir conexão com RabbitMQ: {e}")
 
     async def disconnect(self) -> None:
-        """Encerrar conexão com o RabbitMQ"""
         try:
             await self.connection.close()
         except Exception as e:
