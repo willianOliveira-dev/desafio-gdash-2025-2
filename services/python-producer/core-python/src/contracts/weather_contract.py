@@ -5,13 +5,13 @@ class WeatherData(BaseModel):
     city: str
     country: str
     temperature: float
-    feels_like: float
-    temp_min: float
-    temp_max: float
+    feelsLike: float
+    tempMin: float
+    tempMax: float
     humidity: int
     pressure: int
-    wind_speed: float
-    wind_deg: int
+    windSpeed: float
+    windDeg: int
     clouds: int
     condition: str
     sunrise: str
