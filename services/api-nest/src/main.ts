@@ -9,11 +9,11 @@ import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    const BASE_API = 'api/v1';
+    const BASE_API = 'api/v1/gdash';
     const config = app.get(ConfigService<Env>);
 
     app.setGlobalPrefix(BASE_API);
-    
+
     app.use(cookieParser.default());
 
     app.enableCors({
@@ -33,10 +33,9 @@ async function bootstrap() {
     await app.listen(config.get('PORT') ?? 3000);
 
     console.log(
-        `🔥 API rodando em http://localhost:${config.get('PORT')}/${BASE_API}`
-    );
-    console.log(
-        `📘 Documentação em http://localhost:${config.get('PORT')}/docs`
+        `🔥 API rodando em http://localhost:${config.get('PORT')}/${BASE_API}
+         📘 Documentação em http://localhost:${config.get('PORT')}/docs
+        `
     );
 }
 bootstrap();

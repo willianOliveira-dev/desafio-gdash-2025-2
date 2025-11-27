@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { validateEnv, Env } from 'src/env.validation';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { UsersModule } from 'src/modules/users/users.module';
+import { WeathersModule } from 'src/modules/weathers/weathers.module';
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import { UsersModule } from 'src/modules/users/users.module';
         }),
         AuthModule,
         UsersModule,
+        WeathersModule,
     ],
     controllers: [],
     providers: [],
