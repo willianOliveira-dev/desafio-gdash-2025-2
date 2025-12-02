@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { User } from '../schemas/user.schema';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { hash } from 'bcrypt';
@@ -13,12 +12,12 @@ import type {
 export class UsersService {
     constructor(private readonly repo: UsersRepository) {}
 
-    private async existingEmail(email: string): Promise<boolean> {
+    async existingEmail(email: string): Promise<boolean> {
         const count = await this.repo.findEmailCount(email);
         return count > 0;
     }
 
-    private async existingUsername(username: string): Promise<boolean> {
+    async existingUsername(username: string): Promise<boolean> {
         const count = await this.repo.findUsernameCount(username);
         return count > 0;
     }
