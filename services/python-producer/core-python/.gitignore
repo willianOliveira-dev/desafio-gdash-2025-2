@@ -1,0 +1,31 @@
+### Python ###
+# Vens
+venv/
+.env/
+.venv/
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Ruff cache
+.ruff_cache/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing
+.tox/
+.pytest_cache/
+.coverage
+coverage.xml
+
+# IDEs / SO 
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
