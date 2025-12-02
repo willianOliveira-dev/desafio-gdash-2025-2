@@ -1,6 +1,13 @@
 ## Docker ##
 docker-compose.override.yml
 
+# IDEs / SO 
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
 # Envs
 .env
 .env.development.local
