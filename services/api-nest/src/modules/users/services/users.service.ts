@@ -6,6 +6,7 @@ import { UsersRepository } from '../repository/users.repository'
 import type {
   UserModelWithoutPassword,
   UserModel,
+  UserModelWithRefreshToken,
 } from '../interfaces/users.interface'
 
 @Injectable()
@@ -31,7 +32,17 @@ export class UsersService {
     const user: UserModelWithoutPassword | null = await this.repo.findOne(id)
 
     if (!user) {
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND)
+      throw new HttpException('Usuário não encontrado.', HttpStatus.NOT_FOUND)
+    }
+
+    return user
+  }
+
+  async findOneWithRefreshToken(id: string): Promise<UserModelWithRefreshToken | never> {
+    const user: UserModelWithRefreshToken | null = await this.repo.findOneWithRefreshToken(id)
+
+    if (!user) {
+      throw new HttpException('Usuário não encontrado.', HttpStatus.NOT_FOUND)
     }
 
     return user

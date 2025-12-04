@@ -106,7 +106,7 @@ export class AuthService {
         },
       )
 
-      const user = await this.usersService.findOne(payload.sub.toString())
+      const user = await this.usersService.findOneWithRefreshToken(payload.sub.toString())
 
       const tokenMatches = await compare(
         refreshTokenFromCookie,

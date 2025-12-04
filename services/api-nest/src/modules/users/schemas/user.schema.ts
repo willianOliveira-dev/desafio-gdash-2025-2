@@ -34,7 +34,7 @@ export class User {
 
   // avatar
   @Prop({ type: String })
-  avatar?: string
+  avatar?: string | null
 
   //firstName
   @Prop({
