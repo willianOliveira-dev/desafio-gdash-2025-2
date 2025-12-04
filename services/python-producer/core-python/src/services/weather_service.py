@@ -59,4 +59,5 @@ class WeatherService:
             condition=weather["description"],
             sunrise=datetime.fromtimestamp(sys["sunrise"]).isoformat(),
             sunset=datetime.fromtimestamp(sys["sunset"]).isoformat(),
+            currentTime=datetime.now().isoformat()
         )

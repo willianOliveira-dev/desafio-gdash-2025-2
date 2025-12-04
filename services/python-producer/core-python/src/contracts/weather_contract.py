@@ -16,3 +16,4 @@ class WeatherData(BaseModel):
     condition: str
     sunrise: str
     sunset: str
+    currentTime: str
