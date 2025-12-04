@@ -2,29 +2,34 @@ from httpx import URL, AsyncClient, HTTPStatusError
 from datetime import datetime
 from src.contracts import WeatherData
 from src.config import settings
+from src.logger import get_logger
 
 
 class WeatherService:
     def __init__(self) -> None:
         if not settings.WEATHER_API_KEY or not settings.WEATHER_BASE_URL:
-            raise ValueError("Configurações de variáveis de ambiente weather imcompletas.")
+            raise ValueError(
+                "Configurações de variáveis de ambiente weather imcompletas."
+            )
 
         self.api_key = settings.WEATHER_API_KEY
         self.open_weather_url = settings.WEATHER_BASE_URL
+        self.logger = get_logger("weather_service")
 
     async def get_weather(self, city: str, units: str = "metric") -> WeatherData:
         try:
             async with AsyncClient() as clientHttp:
                 url = URL(self.open_weather_url)
-
+                self.logger.info("Realizando requisição a API da OpenWeatherMap...")
                 response = await clientHttp.get(
                     url=url, params={"q": city, "appid": self.api_key, "units": units}
-                )  
-                
+                )
                 response.raise_for_status()
-                
+
                 data = response.json()
-                
+
+                self.logger.info(f"Dados obtidos com sucesso: {data}")
+
                 return self._parse_weather_data(data=data)
 
         except HTTPStatusError as e:

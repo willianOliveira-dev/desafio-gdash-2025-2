@@ -1,7 +1,7 @@
 from src.config import settings
 from src.services import WeatherService
 from src.mq import MQProducer
-from datetime import datetime
+from src.logger import get_logger
 import asyncio
 
 
@@ -13,7 +13,7 @@ async def main():
         raise ValueError("Configurações de intervalo ou cidades imcompletas.")
 
     CITIES = CITIES.split(",")
-
+    logger = get_logger("success")
     weather_service = WeatherService()
     mq_producer = MQProducer()
 
@@ -21,8 +21,8 @@ async def main():
         for city in CITIES:
             weather_data = await weather_service.get_weather(city=city.strip())
             await mq_producer.send(message=weather_data.model_dump())
-            print(
-                f"[{datetime.now().isoformat()}] Dados do clima enviados para {city.strip()}"
+            logger.info(
+                f" Dados do clima da cidade {city.strip()} enviados para Worker."
             )
 
         await asyncio.sleep(float(INTERVAL))
