@@ -17,22 +17,37 @@ import { useState } from 'react';
 
 import type { WeatherPageResult } from '@/interfaces/http/models/weather-page-result.interface';
 import { dateFormat } from '@/helpers/date-format';
+import { apiErrorSchema } from '@/http/schemas/api-error.schema';
+import { toast } from 'sonner';
 
 const LIMIT = 10;
 
 export function DasboardRecordHistory() {
     const [page, setPage] = useState(1);
     const offset = (page - 1) * LIMIT;
-    console.log('oi');
+
     const { data, isLoading } = useQuery({
         queryKey: ['weather-logs', page],
         queryFn: async () => {
-            const res = await api<WeatherPageResult>(
-                `weather/logs?limit=${LIMIT}&offset=${offset}`
-            );
+            try {
+                const res = await api<WeatherPageResult>(
+                    `weather/logs?limit=${LIMIT}&offset=${offset}`
+                );
 
-            if (res.data) {
-                return res.data;
+                if (res.data) {
+                    return res.data;
+                }
+            } catch (error) {
+                const parsed = apiErrorSchema.safeParse(error);
+                if (parsed.success) {
+                    toast.error(parsed.data.message, {
+                        richColors: true,
+                    });
+                    return;
+                }
+                toast.error('Erro ao buscar logs de registros climáticos.', {
+                    richColors: true,
+                });
             }
         },
     });
@@ -73,7 +88,7 @@ export function DasboardRecordHistory() {
                             <TableRow key={item.currentTime}>
                                 <TableCell className="font-medium">
                                     {dateFormat({
-                                        date: new Date(item.currentTime),
+                                        date: new Date(item.currentTime + 'Z'),
                                         format: 'dd/MM/yyyy - HH:mm:ss',
                                     })}
                                 </TableCell>

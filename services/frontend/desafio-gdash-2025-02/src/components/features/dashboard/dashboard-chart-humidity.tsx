@@ -18,18 +18,18 @@ import type { Weather } from '@/interfaces/http/models/weather.interface';
 export function DashboardChartHumidity({ data }: { data: Weather[] }) {
     const chartData = data.map((item) => ({
         time: dateFormat({
-            date: new Date(item.currentTime),
+            date: new Date(item.currentTime + 'Z'),
             format: 'HH:mm:ss',
         }),
         humidity: item.humidity,
-    }));
+    })).sort((a, b) => a.time.localeCompare(b.time));;
 
     const chartConfig = {
         humidity: {
             label: 'Umidade (%)',
             color: 'var(--chart-2)',
         },
-    } satisfies ChartConfig;
+    } as ChartConfig;
 
     return (
         <Card className="w-full hover:shadow-md duration-300">

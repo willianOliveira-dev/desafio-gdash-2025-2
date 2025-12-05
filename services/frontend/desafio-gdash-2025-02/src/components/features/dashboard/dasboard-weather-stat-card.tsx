@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
-import type { DashboardWeatherStatCardProps } from '@/interfaces/features/dashboard/dashboard-weather-stat-card.interface';
 import { cn } from '@/lib/utils';
 import { Cloud, Sunrise, Sunset } from 'lucide-react';
+import type { DashboardWeatherStatCardProps } from '@/interfaces/features/dashboard/dashboard-weather-stat-card.interface';
 
 export function DashboardWeatherStatCard({
     className,

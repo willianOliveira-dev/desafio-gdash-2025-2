@@ -22,20 +22,22 @@ interface Weather {
 }
 
 export function DashboardChartFeelsLike({ data }: { data: Weather[] }) {
-    const chartData = data.map((item) => ({
-        time: dateFormat({
-            date: new Date(item.currentTime),
-            format: 'HH:mm:ss',
-        }),
-        feelsLike: item.feelsLike,
-    }));
+    const chartData = data
+        .map((item) => ({
+            time: dateFormat({
+                date: new Date(item.currentTime + 'Z'),
+                format: 'HH:mm:ss',
+            }),
+            feelsLike: item.feelsLike,
+        }))
+        .sort((a, b) => a.time.localeCompare(b.time));
 
     const chartConfig = {
         feelsLike: {
             label: 'Sensação Térmica (°C)',
             color: 'var(--chart-1)',
         },
-    } satisfies ChartConfig;
+    } as ChartConfig;
 
     return (
         <Card className="w-full hover:shadow-md duration-300">

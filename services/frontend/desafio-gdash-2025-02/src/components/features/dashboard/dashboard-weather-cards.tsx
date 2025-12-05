@@ -28,6 +28,9 @@ export function DashboardWeatherCards() {
                 if (parsed.success) {
                     toast.error(parsed.data.message);
                 }
+                toast.error('Erro ao buscar dados climáticos de hoje.', {
+                    richColors: true,
+                });
             }
         },
     });
@@ -83,14 +86,14 @@ export function DashboardWeatherCards() {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-3">
                 <DashboardWeatherStatCard
                     data={dateFormat({
-                        date: new Date(data.sunrise),
+                        date: new Date(data.sunrise + 'Z'),
                         format: 'HH:mm:ss',
                     })}
                     variant="sunrise"
                 />
                 <DashboardWeatherStatCard
                     data={dateFormat({
-                        date: new Date(data.sunset),
+                        date: new Date(data.sunset + 'Z'),
                         format: 'HH:mm:ss',
                     })}
                     variant="sunset"

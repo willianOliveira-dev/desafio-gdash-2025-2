@@ -20,20 +20,22 @@ interface Weather {
 }
 
 export function DashboardChartWind({ data }: { data: Weather[] }) {
-    const chartData = data.map((item) => ({
-        time: dateFormat({
-            date: new Date(item.currentTime),
-            format: 'HH:mm:ss',
-        }),
-        wind: item.windSpeed,
-    }));
+    const chartData = data
+        .map((item) => ({
+            time: dateFormat({
+                date: new Date(item.currentTime + 'Z'),
+                format: 'HH:mm:ss',
+            }),
+            wind: item.windSpeed,
+        }))
+        .sort((a, b) => a.time.localeCompare(b.time));
 
     const chartConfig = {
         wind: {
             label: 'Vento (km/h)',
             color: 'var(--chart-3)',
         },
-    } satisfies ChartConfig;
+    } as ChartConfig;
 
     return (
         <Card className="w-full hover:shadow-md duration-300">
