@@ -84,8 +84,6 @@ export class UsersRepository {
     async create(dto: CreateUserDto): Promise<UserModelWithoutPassword> {
         const data: User = {
             ...dto,
-            firstName: dto.firstName ?? null,
-            lastname: dto.lastname ?? null,
             avatar: dto.avatar ?? null,
             currentHashedRefreshToken: null,
         };

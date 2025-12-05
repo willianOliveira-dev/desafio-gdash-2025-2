@@ -1,77 +1,59 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { hash } from 'bcrypt'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { hash } from 'bcrypt';
 
 @Schema({
-  timestamps: true,
+    timestamps: true,
 })
 export class User {
-  // name
-  @Prop({
-    type: String,
-    required: true,
-    minLength: 2,
-    maxLength: 25,
-    unique: true,
-  })
-  username: string
+    // name
+    @Prop({
+        type: String,
+        required: true,
+        minLength: 2,
+        maxLength: 25,
+        unique: true,
+    })
+    username: string;
 
-  // email
-  @Prop({
-    type: String,
-    required: true,
-    unique: true,
-  })
-  email: string
+    // email
+    @Prop({
+        type: String,
+        required: true,
+        unique: true,
+    })
+    email: string;
 
-  // password
-  @Prop({
-    type: String,
-    required: true,
-    minLength: 8,
-    maxLength: 64,
-  })
-  password: string
+    // password
+    @Prop({
+        type: String,
+        required: true,
+        minLength: 8,
+        maxLength: 64,
+    })
+    password: string;
 
-  // avatar
-  @Prop({ type: String })
-  avatar?: string | null
+    // avatar
+    @Prop({ type: String })
+    avatar?: string | null;
 
-  //firstName
-  @Prop({
-    type: String,
-    minLength: 2,
-    maxLength: 50,
-    default: null,
-  })
-  firstName?: string | null
+    // role
+    @Prop({
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user',
+    })
+    role: string;
 
-  //lastname
-  @Prop({
-    type: String,
-    minLength: 2,
-    maxLength: 50,
-    default: null,
-  })
-  lastname?: string | null
-
-  // role
-  @Prop({
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
-  })
-  role: string
-
-  @Prop({ type: String, required: false, default: null })
-  currentHashedRefreshToken?: string | null
+    @Prop({ type: String, required: false, default: null })
+    currentHashedRefreshToken?: string | null;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User)
+export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next()
+    if (!this.isModified('password')) return next();
 
-  this.password = await hash(this.password, 10)
+    this.password = await hash(this.password, 10);
 
-  next()
-})
+    next();
+});
