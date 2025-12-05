@@ -80,28 +80,26 @@ export function DashboardWeatherCards() {
                     data={`${data.pressure}hPa`}
                 />
             </div>
-            <div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-3">
-                    <DashboardWeatherStatCard
-                        data={dateFormat({
-                            date: new Date(data.sunrise),
-                            format: 'HH:mm:ss',
-                        })}
-                        variant="sunrise"
-                    />
-                    <DashboardWeatherStatCard
-                        data={dateFormat({
-                            date: new Date(data.sunset),
-                            format: 'HH:mm:ss',
-                        })}
-                        variant="sunset"
-                    />
-                    <DashboardWeatherStatCard
-                        className="col-span-1 sm:col-span-2 xl:col-span-1"
-                        data={`${data.condition}`}
-                        variant="condition"
-                    />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-3">
+                <DashboardWeatherStatCard
+                    data={dateFormat({
+                        date: new Date(data.sunrise),
+                        format: 'HH:mm:ss',
+                    })}
+                    variant="sunrise"
+                />
+                <DashboardWeatherStatCard
+                    data={dateFormat({
+                        date: new Date(data.sunset),
+                        format: 'HH:mm:ss',
+                    })}
+                    variant="sunset"
+                />
+                <DashboardWeatherStatCard
+                    className="col-span-1 sm:col-span-2 xl:col-span-1"
+                    data={`${data.condition}`}
+                    variant="condition"
+                />
             </div>
         </section>
     );

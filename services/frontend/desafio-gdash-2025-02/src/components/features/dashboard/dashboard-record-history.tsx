@@ -1,8 +1,4 @@
-import {
-    ChevronLeft,
-    ChevronRight,
-    FileChartColumnIncreasing,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import {
     Table,
@@ -54,7 +50,6 @@ export function DasboardRecordHistory() {
     return (
         <section className="space-y-4">
             <h2 className="flex items-center gap-2 text-xl font-semibold">
-                <FileChartColumnIncreasing className="size-5 text-amber-500" />
                 Histórico de Registros
             </h2>
 
@@ -77,7 +72,10 @@ export function DasboardRecordHistory() {
                         {records.map((item) => (
                             <TableRow key={item.currentTime}>
                                 <TableCell className="font-medium">
-                                    {dateFormat({date: new Date(item.currentTime), format: "dd/MM/yyyy - HH:mm:ss"})}
+                                    {dateFormat({
+                                        date: new Date(item.currentTime),
+                                        format: 'dd/MM/yyyy - HH:mm:ss',
+                                    })}
                                 </TableCell>
 
                                 <TableCell>
