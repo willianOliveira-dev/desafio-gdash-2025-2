@@ -102,7 +102,7 @@ export class Weather {
     required: true,
   })
   sunset: string
-  // sunset
+  // currentTime
   @Prop({
     type: String,
     required: true,

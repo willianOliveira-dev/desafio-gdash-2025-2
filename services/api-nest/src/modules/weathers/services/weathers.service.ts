@@ -50,6 +50,7 @@ export class WeathersService {
       condition: weather.condition,
       sunrise: weather.sunrise,
       sunset: weather.sunset,
+      currentTime: weather.currentTime
     }))
 
     return {
