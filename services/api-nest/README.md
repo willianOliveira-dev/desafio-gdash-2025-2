@@ -53,12 +53,24 @@ A documentação completa de todos os endpoints está disponível via **Swagger 
 | `GET /weather/logs` | Lista logs climáticos, com paginação e filtros (Requer autenticação). |
 | `GET /weather/insights` | Retorna o último relatório de análise de IA (Requer autenticação). |
 | `POST /weather/logs` | Endpoint interno consumido pelo Go Worker para inserção de novos logs. |
+| `POST /weather/today` | Lista logs climáticos do dia. |
 | `GET /weather/export.csv` | Exporta dados completos de clima (Requer autenticação). |
 | `CRUD /users` | Gerenciamento de usuários (Requer autenticação). |
 
 ---
+## 5. Rota de Exploração Externa (/explore)
+Esta rota demonstra a capacidade da API de atuar como um Proxy para serviços externos, encapsulando chamadas e aplicando segurança interna.
 
-## 5. Implementação de Insights de IA
+| Rota | Detalhe |
+| :--- | :--- |
+| **Integração** | API Rick and Morty (consumida via `@nestjs/axios`). |
+| **Segurança** | Requer **autenticação JWT** (`JwtAuthGuard`) para acesso. |
+| **`GET /explore/character`** | **Paginação** e busca de personagens. Suporta filtros por `name`, `gender`, `status` e `page` via query parameters. |
+| **`GET /explore/character/:id`** | Busca detalhada de um personagem específico. |
+
+---
+
+## 6. Implementação de Insights de IA
 
 A inteligência da plataforma é fornecida pela análise assíncrona dos dados.
 
@@ -70,7 +82,7 @@ A inteligência da plataforma é fornecida pela análise assíncrona dos dados.
 
 ---
 
-## 6. Configuração e Variáveis de Ambiente
+## 7. Configuração e Variáveis de Ambiente
 
 As variáveis de ambiente são **validadas** na inicialização (Ver `src/env.validation.ts`) para garantir a integridade do sistema. A estrutura abaixo reflete os parâmetros críticos esperados no arquivo `.env`.
 

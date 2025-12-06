@@ -17,9 +17,6 @@ export default defineConfig({
         viteReact(),
         tailwindcss(),
     ],
-    server: {
-        open: true,
-    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),
