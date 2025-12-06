@@ -38,7 +38,13 @@ async function bootstrap() {
 
   const docConfig = new DocumentBuilder()
     .setTitle('GDASH API')
-    .setDescription('API do desafio GDASH 2025')
+    .setDescription(`
+        API do desafio GDASH 2025. 
+        
+        Autenticação: O login é realizado via rota POST /auth/login. Após a autenticação bem-sucedida, os tokens são armazenados automaticamente pelo seu navegador em Cookies HTTP-only.
+        
+        Isso garante uma maior segurança contra ataques XSS (Cross-Site Scripting)** e CSRF (Cross-Site Request Forgery). Ao logar, o Swagger UI poderá acessar automaticamente todas as rotas privadas sem a necessidade de manipular manualmente os tokens.
+    `)
     .setVersion('1.0')
     .setBasePath(`/${BASE_API}`)
     .build()
