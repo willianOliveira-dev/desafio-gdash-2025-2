@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { apiErrorSchema } from '@/http/schemas/api-error.schema';
-import { api } from '@/services/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -27,14 +26,18 @@ export function UsersDeleteButton({ user, ...props }: UsersDeleteButtonProps) {
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            await api(`users/${user._id}`);
+            await fetch(settings.VITE_API_URL + `/users/${user._id}`, {
+                method: 'DELETE',
+            });
 
             toast.success('Usuário deletado com sucesso!', {
                 richColors: true,
             });
 
             queryClient.invalidateQueries({ queryKey: ['users'] });
+            setIsDialogOpen(false);
         } catch (error) {
+            console.log(error);
             const parsed = apiErrorSchema.safeParse(error);
 
             if (parsed.success) {
