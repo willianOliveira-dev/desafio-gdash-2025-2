@@ -19,10 +19,6 @@ export class WeathersService {
 
     const filter: any = {}
 
-    if (dto.city) {
-      filter.city = { $regex: new RegExp(dto.city, 'i') }
-    }
-
     const options = {
       page,
       limit,
@@ -50,7 +46,7 @@ export class WeathersService {
       condition: weather.condition,
       sunrise: weather.sunrise,
       sunset: weather.sunset,
-      currentTime: weather.currentTime
+      currentTime: weather.currentTime,
     }))
 
     return {

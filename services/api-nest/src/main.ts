@@ -10,8 +10,21 @@ import morgan from 'morgan'
 import helmet from 'helmet'
 import compression from 'compression'
 import * as cookieParser from 'cookie-parser'
-
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import type { NestExpressApplication } from '@nestjs/platform-express'
+import { SwaggerResponseModel } from './common/swagger/model/swagger-response.model'
+import { AvatarModelSwaggerDto } from './common/swagger/dto/avatar-model-swagger.dto'
+import { CharacterModelSwaggerDto } from './common/swagger/dto/character-model-swagger.dto'
+import { CharacterPaginationSwaggerDto } from './common/swagger/dto/character-pagination-swagger.dto'
+import { LocationModelSwaggerDto } from './common/swagger/dto/location-model-swagger.dto'
+import { UserModelWithoutPasswordSwaggerDto } from './common/swagger/dto/user-model-without-password-swagger.dto'
+import { WeatherInsightsSwaggerDto } from './common/swagger/dto/weather-insights-swagger.dto'
+import { WeatherModelSwaggerDto } from './common/swagger/dto/weather-model-swagger.dto'
+import { WeatherPageResultSwaggerDto } from './common/swagger/dto/weather-page-result-swagger.dto'
+import { CreateUserDto } from './modules/users/dto/create-user.dto'
+import { CreateWeatherDto } from './modules/weathers/dto/create-weather.dto'
+import { LoginDto } from './modules/auth/dto/login.dto'
+import { UpdateUserDto } from './modules/users/dto/update-user.dto'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
@@ -21,9 +34,35 @@ async function bootstrap() {
   const BASE_URL = config.get('BASE_URL') as string
   const FRONTEND_URL = config.get('FRONTEND_URL') as string
 
-  app.useStaticAssets(staticFilePath, { prefix: '/public/' })
-
   app.setGlobalPrefix(BASE_API)
+
+  const docConfig = new DocumentBuilder()
+    .setTitle('GDASH API')
+    .setDescription('API do desafio GDASH 2025')
+    .setVersion('1.0')
+    .setBasePath(`/${BASE_API}`)
+    .build()
+
+  const document = SwaggerModule.createDocument(app, docConfig, {
+    extraModels: [
+      SwaggerResponseModel,
+      AvatarModelSwaggerDto,
+      CharacterModelSwaggerDto,
+      CharacterPaginationSwaggerDto,
+      LocationModelSwaggerDto,
+      UserModelWithoutPasswordSwaggerDto,
+      WeatherInsightsSwaggerDto,
+      WeatherModelSwaggerDto,
+      WeatherPageResultSwaggerDto,
+      CreateUserDto,
+      LoginDto,
+      UpdateUserDto,
+      CreateWeatherDto,
+    ],
+  })
+  SwaggerModule.setup('docs', app, document)
+
+  app.useStaticAssets(staticFilePath, { prefix: '/public/' })
 
   app.use(cookieParser.default())
   app.use(morgan('dev'))

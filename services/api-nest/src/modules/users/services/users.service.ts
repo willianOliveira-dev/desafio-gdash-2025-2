@@ -38,8 +38,11 @@ export class UsersService {
     return user
   }
 
-  async findOneWithRefreshToken(id: string): Promise<UserModelWithRefreshToken | never> {
-    const user: UserModelWithRefreshToken | null = await this.repo.findOneWithRefreshToken(id)
+  async findOneWithRefreshToken(
+    id: string,
+  ): Promise<UserModelWithRefreshToken | never> {
+    const user: UserModelWithRefreshToken | null =
+      await this.repo.findOneWithRefreshToken(id)
 
     if (!user) {
       throw new HttpException('Usuário não encontrado.', HttpStatus.NOT_FOUND)
@@ -120,6 +123,7 @@ export class UsersService {
   }
 
   async delete(id: string): Promise<void> {
+    await this.findOne(id)
     await this.repo.delete(id)
   }
 }

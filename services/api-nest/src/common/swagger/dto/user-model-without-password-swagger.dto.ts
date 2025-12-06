@@ -1,5 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { Transform } from 'class-transformer'
+import { Exclude, Transform } from 'class-transformer'
 import {
   IsString,
   IsEmail,
@@ -9,12 +8,19 @@ import {
   Matches,
   IsNotEmpty,
 } from 'class-validator'
+import { ApiProperty } from '@nestjs/swagger'
 
-export class CreateUserDto {
+export class UserModelWithoutPasswordSwaggerDto {
   @ApiProperty({
-    example: 'joaão_silva',
+    example: '60c72b2f9f1b9e0015b67a4e',
+    description: 'ID exclusivo (ObjectId do MongoDB)',
+  })
+  _id: string
+
+  @ApiProperty({
+    example: 'admin',
     description:
-      'Nome de usuário único. Permitido: letras, números, hífen (-) e underscore (_).',
+      'Nome de usuário único. Deve ter entre 2 e 25 caracteres. Permitido: letras, números, hífen (-) e underscore (_). Será transformado para minúsculo.',
     minLength: 2,
     maxLength: 25,
     pattern: '^[A-Za-z0-9_-]+$',
@@ -39,22 +45,6 @@ export class CreateUserDto {
   email: string
 
   @ApiProperty({
-    example: '@Joao123',
-    description:
-      'Senha de acesso. Deve incluir pelo menos uma maiúscula, uma minúscula, um número e um caractere especial.',
-    minLength: 8,
-    maxLength: 64,
-  })
-  @IsNotEmpty({ message: 'A senha é obrigatória.' })
-  @IsString({ message: 'A senha deve ser uma string.' })
-  @Length(8, 64, { message: 'A senha deve ter entre 8 e 64 caracteres.' })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.,#^()\-_=+]).+$/, {
-    message:
-      'A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial',
-  })
-  password: string
-
-  @ApiProperty({
     example: 'https://localhost:3000/public/images/default-avatar.png',
     description: 'URL opcional para a imagem de avatar do usuário.',
     required: false,
@@ -74,4 +64,16 @@ export class CreateUserDto {
   @IsString({ message: 'O papel do usuário deve ser uma string.' })
   @IsIn(['user', 'admin'], { message: 'O papel deve ser "user" ou "admin".' })
   role: string = 'user'
+
+  @ApiProperty({
+    example: new Date().toISOString(),
+    description: 'Data e hora da criação do registro.',
+  })
+  createdAt: Date
+
+  @ApiProperty({
+    example: new Date().toISOString(),
+    description: 'Data e hora da última atualização do registro.',
+  })
+  updatedAt: Date
 }

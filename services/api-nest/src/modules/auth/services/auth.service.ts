@@ -35,7 +35,7 @@ export class AuthService {
       return { accessToken, refreshToken }
     } catch (error) {
       throw new HttpException(
-        'Error interno no servidor.',
+        'Erro interno no servidor.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       )
     }
@@ -106,7 +106,9 @@ export class AuthService {
         },
       )
 
-      const user = await this.usersService.findOneWithRefreshToken(payload.sub.toString())
+      const user = await this.usersService.findOneWithRefreshToken(
+        payload.sub.toString(),
+      )
 
       const tokenMatches = await compare(
         refreshTokenFromCookie,
@@ -137,7 +139,6 @@ export class AuthService {
 
       return { accessToken, refreshToken }
     } catch (err) {
-      console.error('Erro no refresh:', err)
       throw new HttpException(
         'Token de atualização inválido.',
         HttpStatus.UNAUTHORIZED,

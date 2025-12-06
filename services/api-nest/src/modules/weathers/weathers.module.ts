@@ -23,7 +23,7 @@ import { ExportService } from './services/export.service'
     WeathersRepository,
     InsightsService,
     InsightsRepository,
-    ExportService
+    ExportService,
   ],
   controllers: [WeathersController],
   exports: [InsightsService],
