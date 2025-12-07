@@ -24,7 +24,7 @@ export async function api<T = null>(
         return res.json() as unknown as ApiResponse<T>;
     }
 
-    if (res.status === 401 && retry) {
+    if (res.status === 401 && retry &&  baseUrl !== "auth/refresh") {
         try {
             const data = await refreshService();
             console.log(data);
