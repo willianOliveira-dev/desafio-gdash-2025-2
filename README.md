@@ -84,7 +84,7 @@ Aguarde alguns instantes para que todos os contêineres iniciem. Você pode veri
 ```bash
 docker-compose ps
 ```
-Atenção: Aguarde que API NestJS esteja completamente disponivel.  Você pode verificar o status dos contêiner com:
+Atenção: Aguarde API NestJS está completamente disponivel para poder acessar o frontend.  Você pode verificar o status dos contêiner com:
 
 ```bash
 docker-compose logs -f  api-nest
