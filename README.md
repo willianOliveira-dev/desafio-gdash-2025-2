@@ -6,12 +6,6 @@ Este repositório contém a solução técnica para o desafio de processo seleti
 
 A solução implementa um pipeline de dados distribuído que coleta informações climáticas, as processa através de um **Message Broker** e as armazena em uma **API** para serem visualizadas em um **Dashboard interativo**.
 
-####  Vídeo Explicativo
-
-O vídeo explicativo, conforme exigido no desafio, detalhando a arquitetura, pipeline de dados, insights de IA e demonstração de execução.
-
-Link: https://youtu.be/DFtL7qygdoc?si=AO6jpKHsmO_7M_Kq
-
 
 -----
 
