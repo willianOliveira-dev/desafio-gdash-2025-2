@@ -25,7 +25,7 @@ Usamos o **TanStack Query** para lidar com toda a comunicação com a API (fetch
 
 ### Estado da Aplicação
 
-O estado global leve, como o status de autenticação do usuário, é gerenciado pelo **Zustand**. Ele é simples, rápido e não adiciona complexidade desnecessária.
+O estado de autenticação do usuário é gerenciado por **React Context**, enquanto o cache e o estado assíncrono das requisições são administrados pelo **TanStack Query**. Essa separação mantém o fluxo simples e evita dependências desnecessárias.
 
 ### Roteamento e Tipagem de URLs
 
@@ -41,12 +41,12 @@ Para evitar erros bobos no início da aplicação, usamos o **Zod** para **valid
 
 Organizamos o código de forma clara para que qualquer desenvolvedor encontre rapidamente o que precisa:
 
-* **`/src/api`**: Onde estão todos os *hooks* e funções de consumo da API (TanStack Query).
 * **`/src/components`**: Componentes reutilizáveis (botões, tabelas, etc.).
 * **`/src/config`**: Onde o **Zod** valida as variáveis de ambiente e ficam as constantes.
-* **`/src/router`**: A definição da navegação e das páginas.
-* **`/src/stores`**: Onde o **Zustand** gerencia o estado global (ex: autenticação).
-* **`/src/pages`**: A estrutura de alto nível das telas do dashboard.
+* **`/src/routes`**: A definição da navegação e das páginas via TanStack Router.
+* **`/src/services`**: Funções de consumo da API e fluxo de autenticação.
+* **`/src/providers`** e **`/src/contexts`**: Estado global de autenticação com React Context.
+* **`/src/hooks`**: Hooks compartilhados, incluindo consultas com TanStack Query.
 
 ---
 

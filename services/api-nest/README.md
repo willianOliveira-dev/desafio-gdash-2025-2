@@ -17,7 +17,7 @@ A API, construída com NestJS, atua como o **Gateway de Dados** e o **Orquestrad
 
 ## 2. Arquitetura Interna
 
-A aplicação adota uma **Arquitetura Escalável e Manutenível** (Clean Architecture/Domain-Driven Design), organizando a lógica em **Módulos** coesos e bem definidos.
+A aplicação adota uma **Arquitetura Modular em Camadas**, organizando a lógica em **Módulos** coesos e bem definidos.
 
 | Módulo | Responsabilidades Chave |
 | :--- | :--- |
@@ -38,6 +38,8 @@ O mecanismo de autenticação foi projetado para ser **Seguro e Livre de Respons
 3.  **Fluxo Transparente:** Todas as requisições subsequentes do navegador enviam automaticamente os cookies para o servidor. O servidor valida o `accessToken` e renova o `refreshToken` quando necessário.
 4.  **Middleware de Segurança:** Utilização de `helmet`, `compression` e `morgan` para proteção básica e monitoramento.
 
+Além da autenticação de usuários, o endpoint interno `POST /weather/logs` exige o header **`X-Worker-Token`**, compartilhado exclusivamente entre o **Go Worker** e a API.
+
 ---
 
 ## 4. Endpoints Principais
@@ -52,10 +54,11 @@ A documentação completa de todos os endpoints está disponível via **Swagger 
 | `POST /auth/login` | Autentica o usuário e define os Cookies HTTP-only. |
 | `GET /weather/logs` | Lista logs climáticos, com paginação e filtros (Requer autenticação). |
 | `GET /weather/insights` | Retorna o último relatório de análise de IA (Requer autenticação). |
-| `POST /weather/logs` | Endpoint interno consumido pelo Go Worker para inserção de novos logs. |
-| `POST /weather/today` | Lista logs climáticos do dia. |
+| `POST /weather/logs` | Endpoint interno consumido pelo Go Worker, protegido por `X-Worker-Token`. |
+| `GET /weather/today` | Lista logs climáticos do dia. |
 | `GET /weather/export.csv` | Exporta dados completos de clima (Requer autenticação). |
 | `CRUD /users` | Gerenciamento de usuários (Requer autenticação). |
+| `GET /health` | Verifica a disponibilidade da API e a conexão com o MongoDB. |
 
 ---
 ## 5. Rota de Exploração Externa (/explore)
@@ -93,6 +96,7 @@ As variáveis de ambiente são **validadas** na inicialização (Ver `src/env.va
 | **`MONGO_URI`** | String de conexão completa do MongoDB. | `mongodb://...` |
 | **`JWT_ACCESS_SECRET`** | Chave secreta para assinatura do Access Token. | (Secreto) |
 | **`JWT_REFRESH_SECRET`** | Chave secreta para assinatura do Refresh Token. | (Secreto) |
+| **`WORKER_API_TOKEN`** | Token interno enviado pelo Go Worker no header `X-Worker-Token`. | (Secreto com no mínimo 32 caracteres) |
 | **`GOOGLE_GENERATIVE_AI_API_KEY`**| Chave de acesso à API do Gemini. | (Secreto) |
 | **`FRONTEND_URL`** | URL do Frontend para configuração do CORS. | `http://localhost:5173` |
 | **`ENSURE_DEFAULT_USER_EMAIL`** | Email para criação do usuário Admin na inicialização. | `admin@gdash.io` |

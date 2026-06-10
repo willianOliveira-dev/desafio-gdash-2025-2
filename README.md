@@ -27,7 +27,7 @@ A stack de desenvolvimento é estritamente aderente aos requisitos do desafio, c
 
 | Serviço | Linguagem | Framework/Tecnologia Principal | Dependências Chave | Banco de Dados/Infra |
 | :--- | :--- | :--- | :--- | :--- |
-| **Frontend** | TypeScript | React + Vite, TanStack Router/Query | `shadcn/ui`, Zustand | Docker |
+| **Frontend** | TypeScript | React + Vite, TanStack Router/Query | `shadcn/ui`, React Context | Docker |
 | **API Principal** | TypeScript | NestJS (Node.js) | Mongoose, JWT, `ai-sdk/google` | MongoDB |
 | **Worker da Fila** | Go | Padrão Go, `amqp` (RabbitMQ Client) | HTTP Client | RabbitMQ |
 | **Coletor de Dados** | Python | `aio-pika`, `httpx` | `aio-pika`, `pydantic` | RabbitMQ |
@@ -61,14 +61,14 @@ Para executar a aplicação localmente, é necessário ter instalado:
 
 #### 6.1. Configuração de Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz do projeto, baseado no template fornecido (`.env.example`), e preencha as variáveis de configuração, incluindo as credenciais do MongoDB e RabbitMQ, bem como a chave da API de Clima (`WEATHER_API_KEY`) e a chave da API do Google AI (`GEMINI_API_KEY`) para o serviço de Insights de IA.
+Crie um arquivo `.env` na raiz do projeto, baseado no template fornecido (`.env.example`), e preencha as variáveis de configuração, incluindo as credenciais do MongoDB e RabbitMQ e o token interno de comunicação (`WORKER_API_TOKEN`). Cada microsserviço também possui seu próprio `.env.example`, incluindo a chave da API de Clima (`WEATHER_API_KEY`) e a chave da API do Google AI (`GOOGLE_GENERATIVE_AI_API_KEY`) para o serviço de Insights de IA.
 
 #### 6.2. Inicialização
 
 Para iniciar todos os serviços (API, Banco de Dados, Message Broker, Frontend, Collector, Worker), execute o comando na raiz do projeto:
 
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 ```
 
 #### 6.3. Verificação
@@ -76,12 +76,12 @@ docker-compose up --build -d
 Aguarde alguns instantes para que todos os contêineres iniciem. Você pode verificar o status dos contêineres com:
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
-Atenção: Aguarde API NestJS está completamente disponivel para poder acessar o frontend.  Você pode verificar o status dos contêiner com:
+Atenção: aguarde até que a API NestJS esteja completamente disponível para acessar o frontend. O Docker Compose utiliza **Health Checks** para controlar a ordem de inicialização dos serviços. Você pode acompanhar o status da API com:
 
 ```bash
-docker-compose logs -f  api-nest
+docker compose logs -f api-nest
 ```
 -----
 
@@ -94,6 +94,7 @@ Com base na configuração do `docker-compose.yml` e das variáveis de ambiente,
 | **Frontend** | `http://localhost:5173` | Dashboard principal e interface de usuário. |
 | **API Principal** | `http://localhost:3000` | Núcleo do sistema, autenticação e fonte de dados. |
 | **Documentação da API** | `http://localhost:3000/docs` | Documentação dos endpoints via Swagger/OpenAPI. |
+| **Health Check da API** | `http://localhost:3000/api/v1/gdash/health` | Verifica a disponibilidade da API e a conexão com o MongoDB. |
 | **RabbitMQ Management** | `http://localhost:15672` | Interface de gerenciamento do Message Broker. |
 
 -----
@@ -105,13 +106,13 @@ Com base na configuração do `docker-compose.yml` e das variáveis de ambiente,
 Responsabilidade: Buscar a previsão do tempo periodicamente e produzir mensagens na fila.
 API Externa: **OpenWeatherMap** (API de tempo atual).
 Frequência: **3600 segundos (1 hora)**, conforme a variável `WEATHER_INTERVAL`.
-Mensageria: Usa `aio-pika` para comunicação assíncrona com o RabbitMQ.
+Mensageria: Usa `aio-pika` para comunicação assíncrona com o RabbitMQ, mantendo uma conexão robusta e persistente durante o processo.
 Localização: Coleta dados para `WEATHER_CITIES=Rio de Janeiro`.
 
 #### 8.2. Worker da Fila (`/services/go-worker`)
 
 Responsabilidade: Consumir mensagens do Message Broker (**RabbitMQ**), realizar validações de schema e enviar os dados tratados via HTTP POST para a API NestJS.
-Tratamento de Erro: Implementação de retry básico no consumo da fila e logs detalhados de confirmação (`ack`/`nack`).
+Tratamento de Erro: Implementação de retry para falhas transitórias, descarte de erros permanentes, reconexão automática ao RabbitMQ e logs detalhados de confirmação (`ack`/`nack`).
 
 #### 8.3. API Principal (`/services/api-nest` - NestJS)
 
@@ -122,7 +123,7 @@ Funcionalidade Auxiliar: Rota `/explore` para demonstração de consumo de API d
 | Tag | Funcionalidade | Endpoint (Exemplo) | Tipo | Rota Protegida |
 | :--- | :--- | :--- | :--- | :--- |
 | Weather | Insights de IA | `GET /weather/insights` | Privado | Sim |
-| Weather | Recebimento de Dados | `POST /weather/logs` | Interno | Não |
+| Weather | Recebimento de Dados | `POST /weather/logs` | Interno | Sim (`X-Worker-Token`) |
 | Weather | Listagem de Logs | `GET /weather/logs` | Privado | Sim |
 | Weather | Exportar CSV/XLSX | `GET /weather/export.csv/.xlsx` | Privado | Sim |
 | Auth | Login/Logout/Refresh | `POST /auth/...` | Misto | Sim/Não |
@@ -169,6 +170,8 @@ Para o primeiro acesso ao Dashboard e às rotas protegidas, o seguinte usuário 
 | Pipeline de Dados (Python $\rightarrow$ RabbitMQ $\rightarrow$ Go $\rightarrow$ NestJS) | Sim |
 | Aplicação Full-Stack (React/NestJS) | Sim |
 | Exportação de Dados (CSV/XLSX) | Sim |
+| Health Checks e Inicialização Ordenada | Sim |
+| Pipeline de Integração Contínua (GitHub Actions) | Sim |
 
 
 ### 12\. Estratégia de Validação de ENVs (Melhor Prática)
@@ -178,5 +181,5 @@ Para garantir a robustez e a segurança de tipagem em toda a arquitetura, cada m
 | :--- | :--- |
 | **API Principal (NestJS)** | `class-validator` e `class-transformer` |
 | **Frontend (React/Vite)** | **`Zod`** |
-| **Worker da Fila (Go)** | Mapeamento nativo de `os.Getenv` para uma *Struct* Tipada |
+| **Worker da Fila (Go)** | Mapeamento nativo de `os.Getenv` para uma *Struct* Tipada, com validação de campos obrigatórios |
 | **Coletor de Dados (Python)** | **`pydantic-settings`** |

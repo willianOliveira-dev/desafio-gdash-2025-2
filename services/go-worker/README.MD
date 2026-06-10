@@ -30,10 +30,14 @@ O `go-worker` garante que cada mensagem seja processada ou, em caso de falha per
 O *worker* implementa um mecanismo de resiliência para garantir que a falha da API Destino (NestJS) não resulte em perda de dados:
 
 1.  **Tentativas HTTP:** O *worker* tenta enviar a mensagem validada via **HTTP POST** para o endpoint da API Principal.
-2.  **Retry com Backoff:** Em caso de falha na entrega (erro de rede ou status HTTP $\ge 400$ da API Destino), o *worker* executa **3 tentativas** adicionais, com um *delay* de 2 segundos entre elas.
+2.  **Retry com Backoff:** Em caso de falha transitória na entrega (erro de rede, timeout, HTTP 429 ou HTTP 5xx), o *worker* executa até **3 tentativas**, com um *delay* de 2 segundos entre elas. Erros HTTP 4xx permanentes são descartados para evitar loops de mensagens inválidas.
 3.  **Confirmação Final:**
     * **Sucesso:** Se qualquer tentativa for bem-sucedida, a mensagem recebe um **`Ack(false)`** e é removida da fila.
     * **Falha Persistente:** Se todas as 3 tentativas falharem, a mensagem recebe um **`Nack(requeue=true)`** e é devolvida à fila para processamento futuro, evitando perda de dados.
+
+### Reconexão com o RabbitMQ
+
+Se a conexão com o RabbitMQ não estiver disponível na inicialização ou for encerrada durante a execução, o processo aguarda 5 segundos e tenta estabelecer uma nova conexão automaticamente.
 
 ---
 
@@ -44,9 +48,11 @@ O contrato de dados é estritamente aplicado pelo *worker* para garantir a quali
 | Campo JSON | Tipo Go | Requisito de Validação |
 | :--- | :--- | :--- |
 | `city`, `country`, `condition` | `string` | Não pode ser vazio. |
-| `temperature`, `feelsLike`, `tempMin`, `tempMax` | `float64` | Não pode ser zero. |
-| `humidity`, `pressure`, `windSpeed` | `float64` | Não pode ser zero. |
-| `clouds`, `windDeg` | `float64` | Não pode ser zero. |
+| `temperature`, `feelsLike`, `tempMin`, `tempMax` | `float64` | Campo obrigatório; valores iguais a zero são válidos. |
+| `humidity` | `float64` | Campo obrigatório, entre 0 e 100. |
+| `pressure` | `float64` | Campo obrigatório e maior que zero. |
+| `windSpeed` | `float64` | Campo obrigatório e não negativo. |
+| `clouds`, `windDeg` | `float64` | Campos obrigatórios; nuvens entre 0 e 100 e direção entre 0 e 360. |
 | `sunrise`, `sunset`, `currentTime` | `string` | Não pode ser vazio. |
 
 ---
@@ -62,3 +68,4 @@ O *worker* carrega suas configurações através de uma *Struct* tipada (`config
 | **`RABBITMQ_EXCHANGE`** | Nome da *exchange* para vincular. |
 | **`RABBITMQ_ROUTING_KEY`** | Chave de roteamento usada na vinculação. |
 | **`API_NEST_URL`** | URL completa do endpoint **`POST /weather/logs`** da API Principal. |
+| **`WORKER_API_TOKEN`** | Token compartilhado enviado à API no header **`X-Worker-Token`**. |
