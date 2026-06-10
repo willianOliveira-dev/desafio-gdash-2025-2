@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    name: API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api-nest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: services/api-nest/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/frontend/desafio-gdash-2025-02
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: services/frontend/desafio-gdash-2025-02/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  go-worker:
+    name: Go worker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/go-worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: services/go-worker/go.mod
+          cache-dependency-path: services/go-worker/go.sum
+      - run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go build ./...
+
+  python-producer:
+    name: Python producer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/python-producer/core-python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: python -m pip install ruff
+      - run: python -m compileall -q src
+      - run: ruff format --check src
+      - run: ruff check src
+
+  compose:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose config --quiet
