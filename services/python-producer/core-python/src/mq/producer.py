@@ -1,42 +1,35 @@
 import json
-from aio_pika import Message, DeliveryMode, ExchangeType
-from src.mq.connection import RabbitMQConnection
-from src.config import settings
+
+from aio_pika import DeliveryMode, Message
+
 from src.logger import get_logger
+from src.mq.connection import RabbitMQConnection
 
 
 class MQProducer:
     def __init__(self) -> None:
         self.logger = get_logger("rabbit_producer")
+        self.connection = RabbitMQConnection()
+
+    async def connect(self) -> None:
+        await self.connection.connect()
+
+    async def close(self) -> None:
+        await self.connection.disconnect()
 
     async def send(self, message: dict) -> None:
-        conn = RabbitMQConnection()
-        channel, queue = await conn.connect()
+        await self.connection.connect()
 
-        exchange_name = settings.RABBITMQ_EXCHANGE
-        routing_key = settings.RABBITMQ_ROUTING_KEY
-
-        if not exchange_name or not routing_key:
-            raise ValueError(
-                "Configurações de variáveis de ambiente RabbitMQ incompletas."
-            )
-
-        exchange = await channel.declare_exchange(
-            name=exchange_name, type=ExchangeType.DIRECT, durable=True
-        )
-
-        await queue.bind(exchange=exchange, routing_key=routing_key)
-
-        await exchange.publish(
+        await self.connection.exchange.publish(
             message=Message(
                 body=json.dumps(message).encode("utf-8"),
                 delivery_mode=DeliveryMode.PERSISTENT,
             ),
-            routing_key=routing_key,
+            routing_key=self.connection.routing_key,
         )
 
         self.logger.info(
-            f"Mensagem publicada: {json.dumps(message)} na fila: {queue.name} via exchange: {exchange.name}"
+            f"Mensagem publicada na fila {self.connection.queue.name} "
+            f"via exchange {self.connection.exchange.name}: "
+            f"{json.dumps(message)}"
         )
-
-        await conn.disconnect()

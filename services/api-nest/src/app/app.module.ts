@@ -1,14 +1,15 @@
-import { Module, OnModuleInit } from '@nestjs/common'
+import { Module, type OnModuleInit } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
-import { validateEnv, Env } from 'src/env.validation'
+import { type Env, validateEnv } from 'src/env.validation'
 import { AuthModule } from 'src/modules/auth/auth.module'
-import { UsersModule } from 'src/modules/users/users.module'
-import { WeathersModule } from 'src/modules/weathers/weathers.module'
-import { UserSeeder } from './seed/user.seeder'
-import { InsightsSeeder } from './seed/insights.seeder'
 import { AvatarsModule } from 'src/modules/avatars/avatars.module'
 import { ExploreModule } from 'src/modules/explore/explore.module'
+import { HealthModule } from 'src/modules/health/health.module'
+import { UsersModule } from 'src/modules/users/users.module'
+import { WeathersModule } from 'src/modules/weathers/weathers.module'
+import { InsightsSeeder } from './seed/insights.seeder'
+import { UserSeeder } from './seed/user.seeder'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -26,6 +27,7 @@ import { ExploreModule } from 'src/modules/explore/explore.module'
     AvatarsModule,
     WeathersModule,
     ExploreModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [UserSeeder, InsightsSeeder],

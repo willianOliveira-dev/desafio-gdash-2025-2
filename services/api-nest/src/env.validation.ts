@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer'
-import { IsNumber, IsString, validateSync } from 'class-validator'
+import { IsNumber, IsString, MinLength, validateSync } from 'class-validator'
 
 export class Env {
   @IsString()
@@ -44,6 +44,9 @@ export class Env {
   CLOUDINARY_API_SECRET: string
   @IsString()
   ENABLE_AVATAR_UPLOAD: string
+  @IsString()
+  @MinLength(32)
+  WORKER_API_TOKEN: string
 }
 
 export function validateEnv(config: Record<string, unknown>) {

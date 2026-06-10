@@ -1,28 +1,22 @@
 package mq
 
 import (
-	"log"
+	"fmt"
 
 	amqp "github.com/rabbitmq/amqp091-go"
-	config "github.com/willianOliveira-dev/desafio-gdash-2025/go-worker/config"
 )
 
-func ConnectRabbitMQ() (*amqp.Connection, *amqp.Channel) {
-	env := config.Settings()
-	url := env.RABBITMQ_URL
-
-	connection, error := amqp.Dial(url)
-
-	if error != nil {
-		log.Fatalf("Error ao conectar ao RabbitMQ: %v", error)
+func ConnectRabbitMQ(url string) (*amqp.Connection, *amqp.Channel, error) {
+	connection, err := amqp.Dial(url)
+	if err != nil {
+		return nil, nil, fmt.Errorf("conectar ao RabbitMQ: %w", err)
 	}
 
-	channel, error := connection.Channel()
-
-	if error != nil {
-		log.Fatalf("Error ao abrir canal: %v", error)
+	channel, err := connection.Channel()
+	if err != nil {
+		connection.Close()
+		return nil, nil, fmt.Errorf("abrir canal do RabbitMQ: %w", err)
 	}
 
-	return connection, channel
-
+	return connection, channel, nil
 }

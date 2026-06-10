@@ -1,30 +1,39 @@
-import { Body, Controller, Header, Query, Res, UseGuards } from '@nestjs/common'
-import { WeathersService } from '../services/weathers.service'
-import { Get, Post } from '@nestjs/common'
-import { GetWeathersDto } from '../dto/get-weather.dto'
-import { CreateWeatherDto } from '../dto/create-weather.dto'
-import { InsightsService } from '../services/insights.service'
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
-import { ExportService } from '../services/export.service'
 import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common'
+import {
+  ApiHeader,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import { ApiStandardResponse } from 'src/common/swagger/decorators/api-standard-response.decorator'
+import type { Response } from 'express'
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
+import { WorkerAuthGuard } from 'src/common/guards/worker-auth.guard'
+import type { ResponseApi } from 'src/common/interfaces/response-api.interface'
 import { ApiAuth } from 'src/common/swagger/decorators/api-cookies-auth.decorator'
+import { ApiStandardResponse } from 'src/common/swagger/decorators/api-standard-response.decorator'
+import { ApiErrorResponseDto } from 'src/common/swagger/dto/api-error-response.dto'
+import { WeatherInsightsSwaggerDto } from 'src/common/swagger/dto/weather-insights-swagger.dto'
 import { WeatherModelSwaggerDto } from 'src/common/swagger/dto/weather-model-swagger.dto'
 import { WeatherPageResultSwaggerDto } from 'src/common/swagger/dto/weather-page-result-swagger.dto'
-import { WeatherInsightsSwaggerDto } from 'src/common/swagger/dto/weather-insights-swagger.dto'
-import { ApiErrorResponseDto } from 'src/common/swagger/dto/api-error-response.dto'
+import { CreateWeatherDto } from '../dto/create-weather.dto'
+import { GetWeathersDto } from '../dto/get-weather.dto'
 import type { WeatherInsights } from '../interfaces/insights.interface'
-import { type Response } from 'express'
-import type { ResponseApi } from 'src/common/interfaces/response-api.interface'
 import type {
   WeatherModel,
   WeatherPageResult,
 } from '../interfaces/weather.interface'
+import { ExportService } from '../services/export.service'
+import { InsightsService } from '../services/insights.service'
+import { WeathersService } from '../services/weathers.service'
 
 @ApiTags('Weather')
 @Controller('weather')
@@ -57,12 +66,21 @@ export class WeathersController {
   }
 
   @Post('logs')
+  @UseGuards(WorkerAuthGuard)
+  @ApiHeader({
+    name: 'X-Worker-Token',
+    description: 'Credencial interna compartilhada com o Go Worker.',
+    required: true,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Credencial do worker ausente ou invalida.',
+    type: ApiErrorResponseDto,
+  })
   @ApiInternalServerErrorResponse({
     description: 'Erro interno no servidor.',
     type: ApiErrorResponseDto,
   })
   @ApiStandardResponse(WeatherModelSwaggerDto, false, 201)
-  @ApiAuth()
   async createWeather(
     @Body() dto: CreateWeatherDto,
   ): Promise<ResponseApi<WeatherModel>> {
