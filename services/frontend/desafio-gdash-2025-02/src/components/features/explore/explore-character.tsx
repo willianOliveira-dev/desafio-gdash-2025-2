@@ -11,6 +11,7 @@ import type {
     Character,
     Location,
 } from '@/interfaces/http/models/character.interface';
+import { CharacterImage } from './character-image';
 
 export function ExploreCharacter({ char }: { char: Character }) {
     return (
@@ -26,7 +27,7 @@ export function ExploreCharacter({ char }: { char: Character }) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                 <div className="flex justify-center">
-                    <img
+                    <CharacterImage
                         src={char.image}
                         alt={char.name}
                         className="size-48 rounded-xl object-cover shadow-md"

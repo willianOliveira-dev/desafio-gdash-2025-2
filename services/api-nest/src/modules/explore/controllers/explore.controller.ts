@@ -27,7 +27,7 @@ import { CharacterModelSwaggerDto } from 'src/common/swagger/dto/character-model
 import { ApiErrorResponseDto } from 'src/common/swagger/dto/api-error-response.dto'
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
 
-UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiTags('explore')
 @Controller('explore')
 export class ExploreController {
@@ -49,7 +49,7 @@ export class ExploreController {
   @ApiAuth()
   async searchForCharacter(
     @Query() dto: QueryParamApiExternal,
-  ): Promise<ResponseApi<CharacterSchemaPagination | []>> {
+  ): Promise<ResponseApi<CharacterSchemaPagination>> {
     const characters = await this.exploreService.searchForCharacters(dto)
     return {
       message: 'Personagens encontrados com sucesso.',

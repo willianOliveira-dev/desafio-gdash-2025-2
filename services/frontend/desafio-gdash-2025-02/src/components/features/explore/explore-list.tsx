@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/services/api';
-import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { apiErrorSchema } from '@/http/schemas/api-error.schema';
 import type { ExplorePagination } from '@/interfaces/http/models/explore-pagination.interface';
 import { ExploreItem } from './explore-item';
@@ -9,41 +8,45 @@ import { Button } from '@/components/ui/button';
 import { ExploreItemSkeleton } from './explore-item-skeleton';
 
 export function ExploreList() {
-    const SKELETON_ITEMS = Array.from({ length: 20 });
+    const SKELETON_ITEMS = Array.from({ length: 20 }, (_, index) => index);
     const [name, setName] = useState<string>('');
+    const [debouncedName, setDebouncedName] = useState<string>('');
     const [status, setStatus] = useState<'alive' | 'dead' | 'unknown' | ''>('');
     const [gender, setGender] = useState<
         'female' | 'male' | 'genderless' | 'unknown' | ''
     >('');
     const [page, setPage] = useState<number>(1);
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['explore', name, status, gender, page],
-        queryFn: async () => {
-            try {
-                const params = new URLSearchParams();
-                if (page) params.append('page', String(page));
-                if (name) params.append('name', name);
-                if (status) params.append('status', status);
-                if (gender) params.append('gender', gender);
+    useEffect(() => {
+        const timeout = window.setTimeout(() => {
+            setDebouncedName(name.trim());
+        }, 400);
 
-                const res = await api<ExplorePagination>(
-                    `explore/character?${params.toString()}`
-                );
-                return res.data;
-            } catch (error) {
-                const parsed = apiErrorSchema.safeParse(error);
-                if (parsed.success) {
-                    toast.error(parsed.data.message, { richColors: true });
-                }
-                toast.error('Erro ao buscar dados do Rick e Morty.', {
-                    richColors: true,
-                });
-            }
+        return () => window.clearTimeout(timeout);
+    }, [name]);
+
+    const { data, error, isError, isFetching, isLoading, refetch } = useQuery({
+        queryKey: ['explore', debouncedName, status, gender, page],
+        queryFn: async () => {
+            const params = new URLSearchParams();
+            params.set('page', String(page));
+            if (debouncedName) params.set('name', debouncedName);
+            if (status) params.set('status', status);
+            if (gender) params.set('gender', gender);
+
+            const res = await api<ExplorePagination>(
+                `explore/character?${params.toString()}`
+            );
+            return res.data;
         },
+        placeholderData: keepPreviousData,
+        retry: 1,
     });
 
-    if (data?.info === null) return null;
+    const parsedError = apiErrorSchema.safeParse(error);
+    const errorMessage = parsedError.success
+        ? parsedError.data.message
+        : 'Nao foi possivel buscar os personagens.';
 
     return (
         <div className="space-y-4">
@@ -52,13 +55,25 @@ export function ExploreList() {
                     type="text"
                     placeholder="Nome"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                        setName(e.target.value);
+                        setPage(1);
+                    }}
                     className="border rounded p-2 flex-1"
                 />
                 <div className="space-x-2.5">
                     <select
                         value={status}
-                        onChange={(e) => setStatus(e.target.value as any)}
+                        onChange={(e) => {
+                            setStatus(
+                                e.target.value as
+                                    | 'alive'
+                                    | 'dead'
+                                    | 'unknown'
+                                    | ''
+                            );
+                            setPage(1);
+                        }}
                         className="border rounded p-2"
                     >
                         <option value="">Status</option>
@@ -69,7 +84,17 @@ export function ExploreList() {
 
                     <select
                         value={gender}
-                        onChange={(e) => setGender(e.target.value as any)}
+                        onChange={(e) => {
+                            setGender(
+                                e.target.value as
+                                    | 'female'
+                                    | 'male'
+                                    | 'genderless'
+                                    | 'unknown'
+                                    | ''
+                            );
+                            setPage(1);
+                        }}
                         className="border rounded p-2"
                     >
                         <option value="">Gênero</option>
@@ -83,21 +108,38 @@ export function ExploreList() {
 
             {isLoading ? (
                 <ul className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                    {SKELETON_ITEMS.map((_, index) => (
-                        <ExploreItemSkeleton key={index} />
+                    {SKELETON_ITEMS.map((item) => (
+                        <ExploreItemSkeleton key={item} />
                     ))}
                 </ul>
-            ) : data && !Array.isArray(data) && data.results.length > 0 ? (
+            ) : isError ? (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+                    <p>{errorMessage}</p>
+                    <Button
+                        variant="outline"
+                        className="mt-3"
+                        onClick={() => refetch()}
+                    >
+                        Tentar novamente
+                    </Button>
+                </div>
+            ) : data && data.results.length > 0 ? (
                 <ul className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                     {data.results.map((char) => (
-                        <ExploreItem char={char} />
+                        <ExploreItem key={char.id} char={char} />
                     ))}
                 </ul>
             ) : (
                 <p>Nenhum personagem encontrado.</p>
             )}
 
-            {data && !Array.isArray(data) && data.info ? (
+            {isFetching && !isLoading ? (
+                <p className="text-center text-xs text-muted-foreground">
+                    Atualizando resultados...
+                </p>
+            ) : null}
+
+            {data && data.info.pages > 0 ? (
                 <div className="flex items-center justify-center w-full  pt-2 border-t">
                     <div className="flex items-center gap-3">
                         <Button

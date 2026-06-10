@@ -1,6 +1,7 @@
 import { Dialog } from '@/components/ui/dialog';
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { ExploreCharacter } from './explore-character';
+import { CharacterImage } from './character-image';
 
 import type { Character } from '@/interfaces/http/models/character.interface';
 export function ExploreItem({ char }: { char: Character }) {
@@ -12,7 +13,7 @@ export function ExploreItem({ char }: { char: Character }) {
                         #{String(char.id).padStart(3, '0')}
                     </span>
                     <div className="size-32 lg:size-40 cursor-pointer bg-linear-to-br from-blue-200 to-blue-400 rounded-2xl overflow-hidden mb-3 flex items-center justify-center">
-                        <img
+                        <CharacterImage
                             src={char.image}
                             alt={char.name}
                             className="object-cover w-full h-full transform hover:scale-105 transition-transform duration-300"
